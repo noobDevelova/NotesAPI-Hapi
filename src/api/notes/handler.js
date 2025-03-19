@@ -1,77 +1,72 @@
 const BaseResponse = require('../../utils/BaseResponse');
 
 class NotesHandler {
-  constructor(service) {
+  constructor(service, validator) {
     this._service = service;
+    this._validator = validator;
   }
 
-  postNoteHandler = (request, h) => {
-    try {
-      const { title = 'untitled', body, tags } = request.payload;
+  postNoteHandler = async (request, h) => {
+    this._validator.validateNotePayload(request.payload);
+    const { title = 'untitled', body, tags } = request.payload;
+    const noteId = await this._service.addNote({ title, body, tags });
 
-      const noteId = this._service.addNote({ title, body, tags });
+    const response = BaseResponse.create({
+      status: 'success',
+      message: 'Catatan berhasil ditambahkan',
+      data: {
+        noteId,
+      },
+    });
 
-      const response = BaseResponse.create({
-        status: 'success',
-        message: 'Catatan berhasil ditambahkan',
-        data: {
-          noteId,
-        },
-      });
-
-      return h.response(response).code(201);
-    } catch (error) {
-      const response = BaseResponse.create({
-        status: 'fail',
-        message: error.message,
-      });
-
-      return h.response(response).code(404);
-    }
+    return h.response(response).code(201);
   };
 
-  getNotesHandler = () => {
-    const notes = this._service.getNotes();
+  getNotesHandler = async (request, h) => {
+    this._validator.validateNoteQuery(request.query);
+    const { name } = request.query;
+    const notes = await this._service.getNotes();
+
+    if (name && name !== '') {
+      const filteredNotes = notes.filter(note => note.title.includes(name));
+      return BaseResponse.create({
+        status: 'success',
+        message: 'Berhasil Mengambil Data Notes',
+        data: {
+          items: filteredNotes,
+        },
+      });
+    }
 
     return BaseResponse.create({
       status: 'success',
       message: 'Berhasil Mengambil Data Notes',
       data: {
-        notes,
+        items: notes,
       },
     });
   };
 
-  getNoteByIdHandler = (request, h) => {
-    try {
-      const { id } = request.params;
+  getNoteByIdHandler = async (request, h) => {
+    const { id } = request.params;
+    const note = await this._service.getNoteById(id);
 
-      const note = this._service.getNoteById(id);
+    const response = BaseResponse.create({
+      status: 'success',
+      message: 'Berhasil Mengambil Note',
+      data: {
+        note,
+      },
+    });
 
-      const response = BaseResponse.create({
-        status: 'success',
-        message: 'Berhasil Mengambil Note',
-        data: {
-          note,
-        },
-      });
-
-      return h.response(response).code(200);
-    } catch (error) {
-      const response = BaseResponse.create({
-        status: 'fail',
-        message: error.message,
-      });
-
-      return h.response(response).code(404);
-    }
+    return h.response(response).code(200);
   };
 
-  putNoteByIdHandler = (request, h) => {
+  putNoteByIdHandler = async (request, h) => {
     try {
+      this._validator.validateNotePayload(request.payload);
       const { id } = request.params;
-
-      this._service.editNoteById(id, request.payload);
+      await this._service.editNoteById(id, request.payload);
 
       const response = BaseResponse.create({
         status: 'success',
@@ -85,15 +80,14 @@ class NotesHandler {
         message: error.message,
       });
 
-      return h.response(response).code(404);
+      return h.response(response).code(error.statusCode);
     }
   };
 
-  deleteNoteByIdHandler = (request, h) => {
+  deleteNoteByIdHandler = async (request, h) => {
     try {
       const { id } = request.params;
-
-      this._service.deleteNoteById(id);
+      await this._service.deleteNoteById(id);
 
       const response = BaseResponse.create({
         status: 'success',
@@ -104,10 +98,10 @@ class NotesHandler {
     } catch (error) {
       const response = BaseResponse.create({
         status: 'fail',
-        message: 'Catatan berhasil dihapus',
+        message: error.message,
       });
 
-      return h.response(response).code(404);
+      return h.response(response).code(error.statusCode);
     }
   };
 }
