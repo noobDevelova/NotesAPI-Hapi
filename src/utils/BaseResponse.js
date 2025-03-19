@@ -1,5 +1,5 @@
 class BaseResponse {
-  static create({ status, message, data = null }) {
+  static create({ status, message, data }) {
     return {
       status,
       message,
