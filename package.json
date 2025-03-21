@@ -6,22 +6,32 @@
   "scripts": {
     "start:prod": "NODE_ENV=production node ./src/server.js",
     "start:dev": "nodemon ./src/server.js",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
+    "migrate": "node-pg-migrate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/eslint-parser": "^7.26.10",
     "eslint": "^8.52.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-import": "^2.29.0",
-    "nodemon": "^3.0.1"
+    "eslint-plugin-prettier": "^5.2.3",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.5.3"
   },
   "dependencies": {
     "@hapi/hapi": "^21.3.2",
     "@hapi/vision": "^7.0.3",
+    "dotenv": "^16.4.7",
     "handlebars": "^4.7.8",
     "joi": "^17.13.3",
-    "nanoid": "^3.1.20"
+    "nanoid": "^3.1.20",
+    "node-pg-migrate": "^7.9.1",
+    "pg": "^8.14.1"
   }
 }

@@ -1,3 +1,3 @@
-const NotesService = require('./inMemory/notesService');
+const NotesService = require('./postgres/NotesService');
 
 module.exports = { NotesService };

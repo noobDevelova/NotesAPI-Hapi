@@ -22,7 +22,7 @@ class NotesHandler {
     return h.response(response).code(201);
   };
 
-  getNotesHandler = async (request, h) => {
+  getNotesHandler = async request => {
     this._validator.validateNoteQuery(request.query);
     const { name } = request.query;
     const notes = await this._service.getNotes();

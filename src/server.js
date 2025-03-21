@@ -8,13 +8,14 @@ const { NotesService } = require('./services');
 const { NotesValidator } = require('./validator');
 const { ClientError } = require('./exceptions');
 const { BaseResponse } = require('./utils');
+const { EnvAdapter } = require('./infrastructure');
 
 const init = async () => {
   const notesService = new NotesService();
 
   const server = Hapi.server({
-    port: 3000,
-    host: process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0',
+    port: EnvAdapter.get('PORT'),
+    host: EnvAdapter.get('HOST'),
     routes: {
       cors: {
         origin: ['*'],
@@ -28,7 +29,7 @@ const init = async () => {
     engines: {
       hbs: Handlebars,
     },
-    path: __dirname + '/views/screens',
+    path: `${__dirname}/views/screens`,
   });
 
   await server.register({
